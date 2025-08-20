@@ -1,0 +1,98 @@
+import { useEffect, useMemo, useState } from 'react'
+import { useParams, Link } from 'react-router-dom'
+
+function estimateReadingMinutes(text) {
+  const words = String(text ?? '').trim().split(/\s+/).filter(Boolean).length
+  return Math.max(1, Math.round(words / 200))
+}
+
+export default function BlogDetail() {
+  const { id } = useParams()
+  const [blog, setBlog] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [comments, setComments] = useState([])
+  const [loadingComments, setLoadingComments] = useState(true)
+
+  useEffect(() => {
+    setLoading(true)
+    fetch(`http://localhost:3000/api/blogs/${id}`)
+      .then((r) => r.json())
+      .then((data) => { setBlog(data); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [id])
+
+  useEffect(() => {
+    setLoadingComments(true)
+    fetch(`http://localhost:3000/api/blogs/${id}/comments`)
+      .then((r) => r.json())
+      .then((data) => { setComments(data || []); setLoadingComments(false) })
+      .catch(() => setLoadingComments(false))
+  }, [id])
+
+  const minutes = useMemo(() => estimateReadingMinutes(blog?.content), [blog])
+
+  if (loading) {
+    return (
+      <div className="detail">
+        <div className="detail-cover skeleton" />
+        <div className="skeleton-title" style={{ height: 28, width: '70%', marginTop: 16 }} />
+        <div className="skeleton-body" style={{ height: 80, marginTop: 12 }} />
+      </div>
+    )
+  }
+
+  if (!blog) {
+    return (
+      <div className="detail">
+        <p>Yazı bulunamadı.</p>
+        <Link to="/" className="read-btn" style={{ marginTop: 12 }}>Geri dön</Link>
+      </div>
+    )
+  }
+
+  const hueBase = 180 + (String(blog.id).split('').reduce((a, ch) => a + ch.charCodeAt(0), 0) % 150)
+
+  return (
+    <div className="detail">
+      <div className="detail-topbar">
+        <Link to="/" className="read-btn">← Listeye dön</Link>
+      </div>
+      <div className="detail-cover" style={{ '--h': hueBase }} />
+      <h1 style={{ marginBottom: 8 }}>{blog.title}</h1>
+      <div className="detail-meta">
+        <span>{blog.author}</span>
+        {blog.createdAt && <time>· {new Date(blog.createdAt).toLocaleDateString()}</time>}
+        <span>· {minutes} dk okuma</span>
+        {blog.category && <span className="pill" style={{ marginLeft: 8 }}>{blog.category}</span>}
+      </div>
+      <article className="detail-content">
+        {String(blog.content ?? '').split('\n').map((p, i) => (
+          <p key={i}>{p}</p>
+        ))}
+      </article>
+
+      <section className="comments-wrap" style={{ marginTop: 24 }}>
+        <h3 className="comments-title">Yorumlar</h3>
+        {loadingComments ? (
+          <div className="comment-item skeleton" style={{ height: 64 }} />
+        ) : comments.length === 0 ? (
+          <p className="comment-empty">Henüz yorum yok.</p>
+        ) : (
+          <div className="comments">
+            {comments.map((c) => (
+              <div key={c.id ?? `${c.author}-${c.content}`} className="comment-item">
+                <div className="comment-header">
+                  <span className="comment-author">{c.author ?? 'Anonim'}</span>
+                  {c.createdAt && <time className="comment-time">{new Date(c.createdAt).toLocaleString()}</time>}
+                </div>
+                <p className="comment-content">{c.content ?? c.text}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  )
+}
+
+

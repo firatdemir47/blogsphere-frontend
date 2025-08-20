@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Comments from "./Comments";
+import { useNavigate } from "react-router-dom";
 
 export default function BlogList() {
+  const navigate = useNavigate();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedBlogId, setExpandedBlogId] = useState(null);
@@ -100,18 +102,9 @@ export default function BlogList() {
               <button
                 className="blog-card-click"
                 onClick={() => {
-                  const next = expandedBlogId === blog.id ? null : blog.id;
-                  setExpandedBlogId(next);
-                  if (next && !commentsMap[next]) {
-                    // Lazy-load comments for this blog
-                    setCommentsMap((m) => ({ ...m, [next]: { loading: true, data: [] } }));
-                    fetch(`http://localhost:3000/api/blogs/${next}/comments`)
-                      .then((r) => r.json())
-                      .then((data) => setCommentsMap((m) => ({ ...m, [next]: { loading: false, data } })))
-                      .catch(() => setCommentsMap((m) => ({ ...m, [next]: { loading: false, data: [] } })));
-                  }
+                  navigate(`/blog/${blog.id}`)
                 }}
-                aria-expanded={expandedBlogId === blog.id}
+                aria-expanded={false}
               >
                 <div className="blog-cover" />
                 <div className="blog-meta">
@@ -128,15 +121,7 @@ export default function BlogList() {
                 </div>
               </button>
 
-              {expandedBlogId === blog.id && (
-                <div className="comments-wrap">
-                  <h4 className="comments-title">Yorumlar</h4>
-                  <Comments
-                    comments={commentsMap[blog.id]?.data}
-                    loading={commentsMap[blog.id]?.loading}
-                  />
-                </div>
-              )}
+              {/* Yorumlar artık detay sayfasında */}
             </article>
           ))}
         </div>
