@@ -4,10 +4,16 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
 import BlogDetail from './routes/BlogDetail.jsx'
+import Trending from './routes/Trending.jsx'
+import Categories from './routes/Categories.jsx'
+import About from './routes/About.jsx'
 
 const router = createBrowserRouter([
   { path: '/', element: <App /> },
   { path: '/blog/:id', element: <BlogDetail /> },
+  { path: '/trending', element: <Trending /> },
+  { path: '/categories', element: <Categories /> },
+  { path: '/about', element: <About /> },
 ])
 
 createRoot(document.getElementById('root')).render(
