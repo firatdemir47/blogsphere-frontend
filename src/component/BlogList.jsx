@@ -1,13 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import Comments from "./Comments";
 import { useNavigate } from "react-router-dom";
 
 export default function BlogList() {
   const navigate = useNavigate();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [expandedBlogId, setExpandedBlogId] = useState(null);
-  const [commentsMap, setCommentsMap] = useState({}); // { [blogId]: { loading, data } }
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [visibleCount, setVisibleCount] = useState(6);
@@ -63,12 +60,7 @@ export default function BlogList() {
   };
 
   return (
-    <section>
-      <div className="section-head">
-        <h2>Bloglar</h2>
-        <span className="count-badge">{filtered.length}</span>
-      </div>
-
+    <section className="blog-section">
       <div className="controls">
         <input
           className="search-input"
@@ -120,8 +112,6 @@ export default function BlogList() {
                   <span className="read-btn" role="presentation">Oku</span>
                 </div>
               </button>
-
-              {/* Yorumlar artık detay sayfasında */}
             </article>
           ))}
         </div>
