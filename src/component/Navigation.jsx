@@ -41,10 +41,10 @@ export default function Navigation() {
           <button className="theme-toggle" onClick={() => document.body.classList.toggle('light-theme')}>
             🌙
           </button>
-          <button className="write-btn">
+          <Link to="/write" className="write-btn">
             <span className="write-icon">✏️</span>
             <span className="write-text">Yaz</span>
-          </button>
+          </Link>
         </div>
 
         <button 
