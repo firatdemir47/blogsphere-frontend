@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navigation from '../component/Navigation'
+import { categories as predefinedCategories } from '../data/categories'
 
 export default function Write() {
   const navigate = useNavigate()
@@ -14,24 +15,10 @@ export default function Write() {
   const [loadingCategories, setLoadingCategories] = useState(true)
 
   useEffect(() => {
-    setLoadingCategories(true)
-    fetch('http://localhost:3000/api/blogs')
-      .then((r) => r.json())
-      .then((blogs) => {
-        const unique = Array.from(
-          new Set(
-            (Array.isArray(blogs) ? blogs : [])
-              .map((b) => b?.category)
-              .filter((c) => typeof c === 'string' && c.trim().length > 0)
-          )
-        ).sort((a, b) => a.localeCompare(b, 'tr'))
-        setCategories(unique)
-        setLoadingCategories(false)
-      })
-      .catch(() => {
-        setCategories([])
-        setLoadingCategories(false)
-      })
+    // Use the same categories as the Categories page
+    const names = predefinedCategories.map(c => c.name)
+    setCategories(names)
+    setLoadingCategories(false)
   }, [])
 
   async function handleSubmit(e) {
