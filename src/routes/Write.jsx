@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navigation from '../component/Navigation'
 
@@ -10,6 +10,29 @@ export default function Write() {
   const [category, setCategory] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [categories, setCategories] = useState([])
+  const [loadingCategories, setLoadingCategories] = useState(true)
+
+  useEffect(() => {
+    setLoadingCategories(true)
+    fetch('http://localhost:3000/api/blogs')
+      .then((r) => r.json())
+      .then((blogs) => {
+        const unique = Array.from(
+          new Set(
+            (Array.isArray(blogs) ? blogs : [])
+              .map((b) => b?.category)
+              .filter((c) => typeof c === 'string' && c.trim().length > 0)
+          )
+        ).sort((a, b) => a.localeCompare(b, 'tr'))
+        setCategories(unique)
+        setLoadingCategories(false)
+      })
+      .catch(() => {
+        setCategories([])
+        setLoadingCategories(false)
+      })
+  }, [])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -52,12 +75,27 @@ export default function Write() {
             onChange={(e) => setAuthor(e.target.value)}
             required
           />
-          <input
-            className="input"
-            placeholder="Kategori (opsiyonel)"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          />
+          {loadingCategories ? (
+            <select className="input" disabled>
+              <option>Kategoriler yükleniyor...</option>
+            </select>
+          ) : categories.length > 0 ? (
+            <select
+              className="input"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              required
+            >
+              <option value="" disabled>Bir kategori seçin</option>
+              {categories.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          ) : (
+            <select className="input" disabled>
+              <option>Kategori bulunamadı</option>
+            </select>
+          )}
           <textarea
             className="textarea"
             placeholder="İçerik"
