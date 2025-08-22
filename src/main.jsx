@@ -6,6 +6,7 @@ import App from './App.jsx'
 import BlogDetail from './routes/BlogDetail.jsx'
 import Trending from './routes/Trending.jsx'
 import Categories from './routes/Categories.jsx'
+import CategoryDetail from './routes/CategoryDetail.jsx'
 import About from './routes/About.jsx'
 import Write from './routes/Write.jsx'
 
@@ -14,6 +15,7 @@ const router = createBrowserRouter([
   { path: '/blog/:id', element: <BlogDetail /> },
   { path: '/trending', element: <Trending /> },
   { path: '/categories', element: <Categories /> },
+  { path: '/category/:categoryName', element: <CategoryDetail /> },
   { path: '/about', element: <About /> },
   { path: '/write', element: <Write /> },
 ])
