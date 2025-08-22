@@ -1,12 +1,33 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import Navigation from '../component/Navigation'
 import { categories as predefinedCategories } from '../data/categories'
 
 export default function Categories() {
   const [selectedCategory, setSelectedCategory] = useState(null)
+  const [blogs, setBlogs] = useState([])
+  const [loading, setLoading] = useState(true)
 
   const categories = predefinedCategories
+
+  // Blog verilerini çek ve kategori sayılarını hesapla
+  useEffect(() => {
+    fetch('http://localhost:3000/api/blogs')
+      .then((res) => res.json())
+      .then((data) => {
+        setBlogs(data)
+        setLoading(false)
+      })
+      .catch((err) => {
+        console.error('Blogları çekerken hata:', err)
+        setLoading(false)
+      })
+  }, [])
+
+  // Her kategorideki yazı sayısını hesapla
+  const getCategoryCount = (categoryName) => {
+    return blogs.filter(blog => blog.category === categoryName).length
+  }
 
   const filteredCategories = selectedCategory 
     ? categories.filter(cat => cat.name.toLowerCase().includes(selectedCategory.toLowerCase()))
@@ -39,8 +60,10 @@ export default function Categories() {
                 <h3 className="category-name">{category.name}</h3>
                 <p className="category-description">{category.description}</p>
                 <div className="category-footer">
-                  <span className="category-count">{category.count} yazı</span>
-                  <Link to={`/?category=${category.name}`} className="category-link">
+                  <span className="category-count">
+                    {loading ? '...' : `${getCategoryCount(category.name)} yazı`}
+                  </span>
+                  <Link to={`/?category=${encodeURIComponent(category.name)}`} className="category-link">
                     Görüntüle →
                   </Link>
                 </div>

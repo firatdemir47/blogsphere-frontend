@@ -1,13 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function BlogList() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [visibleCount, setVisibleCount] = useState(6);
+
+  const normalizeCategory = (value) =>
+    String(value ?? "")
+      .trim()
+      .toLocaleLowerCase("tr")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/ı/g, "i");
 
   useEffect(() => {
     fetch("http://localhost:3000/api/blogs")
@@ -21,6 +30,14 @@ export default function BlogList() {
         setLoading(false);
       });
   }, []);
+
+  // Sync selectedCategory with URL query parameter `?category=`
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const c = params.get("category");
+    setSelectedCategory(c || null);
+    setVisibleCount(6);
+  }, [location.search]);
 
   if (loading) {
     return (
@@ -46,7 +63,9 @@ export default function BlogList() {
 
   const normalizedQuery = query.trim().toLowerCase();
   const filtered = blogs.filter((b) => {
-    const passesCategory = !selectedCategory || b.category === selectedCategory;
+    const passesCategory =
+      !selectedCategory ||
+      normalizeCategory(b.category) === normalizeCategory(selectedCategory);
     if (!normalizedQuery) return passesCategory;
     const hay = `${b.title ?? ""} ${b.content ?? ""} ${b.author ?? ""}`.toLowerCase();
     return passesCategory && hay.includes(normalizedQuery);
@@ -72,13 +91,18 @@ export default function BlogList() {
           <div className="chips">
             <button
               className={`chip${selectedCategory ? "" : " active"}`}
-              onClick={() => setSelectedCategory(null)}
+              onClick={() => { setSelectedCategory(null); setVisibleCount(6); navigate("/"); }}
             >Tümü</button>
             {categories.map((c) => (
               <button
                 key={c}
-                className={`chip${selectedCategory === c ? " active" : ""}`}
-                onClick={() => { setSelectedCategory(c === selectedCategory ? null : c); setVisibleCount(6); }}
+                className={`chip${normalizeCategory(selectedCategory) === normalizeCategory(c) ? " active" : ""}`}
+                onClick={() => {
+                  const next = c === selectedCategory ? null : c;
+                  setSelectedCategory(next);
+                  setVisibleCount(6);
+                  navigate(next ? `/?category=${encodeURIComponent(next)}` : "/");
+                }}
               >{c}</button>
             ))}
           </div>

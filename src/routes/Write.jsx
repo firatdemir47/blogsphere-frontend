@@ -16,8 +16,7 @@ export default function Write() {
 
   useEffect(() => {
     // Use the same categories as the Categories page
-    const names = predefinedCategories.map(c => c.name)
-    setCategories(names)
+    setCategories(predefinedCategories)
     setLoadingCategories(false)
   }, [])
 
@@ -33,7 +32,7 @@ export default function Write() {
       })
       if (!res.ok) throw new Error('Kaydetme başarısız')
       const created = await res.json()
-      navigate(`/blog/${created.id}`)
+      navigate(`/?category=${encodeURIComponent(category)}`)
     } catch (err) {
       setError(err.message || 'Bir hata oluştu')
     } finally {
@@ -44,10 +43,10 @@ export default function Write() {
   return (
     <>
       <Navigation />
-      <div className="write-page" style={{ maxWidth: 800, margin: '0 auto', padding: 16 }}>
-        <h1 style={{ marginBottom: 12 }}>✍️ Yeni Yazı</h1>
-        {error && <p className="error" style={{ color: 'tomato', marginBottom: 12 }}>{error}</p>}
-        <form onSubmit={handleSubmit} className="write-form" style={{ display: 'grid', gap: 12 }}>
+      <div className="write-page">
+        <h1>✍️ Yeni Yazı</h1>
+        {error && <p className="error">{error}</p>}
+        <form onSubmit={handleSubmit} className="write-form">
           <input
             className="input"
             placeholder="Başlık"
@@ -75,7 +74,9 @@ export default function Write() {
             >
               <option value="" disabled>Bir kategori seçin</option>
               {categories.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <option key={c.name} value={c.name}>
+                  {c.icon} {c.name} - {c.description}
+                </option>
               ))}
             </select>
           ) : (
@@ -91,9 +92,9 @@ export default function Write() {
             rows={12}
             required
           />
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <button type="button" className="cta-secondary" onClick={() => navigate(-1)} disabled={submitting}>Vazgeç</button>
-            <button type="submit" className="read-btn" disabled={submitting}>
+          <div className="button-group">
+            <button type="button" onClick={() => navigate(-1)} disabled={submitting}>Vazgeç</button>
+            <button type="submit" disabled={submitting}>
               {submitting ? 'Kaydediliyor...' : 'Yayınla'}
             </button>
           </div>
