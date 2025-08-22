@@ -32,7 +32,7 @@ export default function Write() {
       })
       if (!res.ok) throw new Error('Kaydetme başarısız')
       const created = await res.json()
-      navigate(`/?category=${encodeURIComponent(category)}`)
+      navigate(`/category/${encodeURIComponent(category)}`)
     } catch (err) {
       setError(err.message || 'Bir hata oluştu')
     } finally {
