@@ -63,7 +63,7 @@ export default function Categories() {
                   <span className="category-count">
                     {loading ? '...' : `${getCategoryCount(category.name)} yazı`}
                   </span>
-                  <Link to={`/?category=${encodeURIComponent(category.name)}`} className="category-link">
+                  <Link to={`/category/${encodeURIComponent(category.name)}`} className="category-link">
                     Görüntüle →
                   </Link>
                 </div>
