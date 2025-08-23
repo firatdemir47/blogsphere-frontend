@@ -15,17 +15,40 @@ export default function Categories() {
     fetch('http://localhost:3000/api/blogs')
       .then((res) => res.json())
       .then((data) => {
-        setBlogs(data)
-        setLoading(false)
+        // API'den gelen veri yapısını kontrol et ve düzelt
+        if (data && data.success && Array.isArray(data.data)) {
+          // API'den gelen veriyi dönüştür
+          const transformedBlogs = data.data.map(blog => ({
+            id: blog.id,
+            title: blog.title,
+            content: blog.content,
+            author: blog.author_name,
+            category: blog.category_name,
+            createdAt: blog.created_at,
+            updatedAt: blog.updated_at
+          }));
+          setBlogs(transformedBlogs);
+        } else if (Array.isArray(data)) {
+          setBlogs(data);
+        } else {
+          console.error("API'den beklenmeyen veri formatı:", data);
+          setBlogs([]);
+        }
+        setLoading(false);
       })
       .catch((err) => {
         console.error('Blogları çekerken hata:', err)
-        setLoading(false)
+        setBlogs([]);
+        setLoading(false);
       })
   }, [])
 
   // Her kategorideki yazı sayısını hesapla
   const getCategoryCount = (categoryName) => {
+    // blogs array olduğundan emin ol
+    if (!Array.isArray(blogs)) {
+      return 0;
+    }
     return blogs.filter(blog => blog.category === categoryName).length
   }
 
