@@ -21,12 +21,32 @@ export default function CategoryDetail() {
     fetch('http://localhost:3000/api/blogs')
       .then((res) => res.json())
       .then((data) => {
-        const filteredBlogs = data.filter(blog => blog.category === categoryName)
-        setBlogs(filteredBlogs)
+        // API'den gelen veri yapısını kontrol et ve düzelt
+        if (data && data.success && Array.isArray(data.data)) {
+          // API'den gelen veriyi dönüştür
+          const transformedBlogs = data.data.map(blog => ({
+            id: blog.id,
+            title: blog.title,
+            content: blog.content,
+            author: blog.author_name,
+            category: blog.category_name,
+            createdAt: blog.created_at,
+            updatedAt: blog.updated_at
+          }));
+          const filteredBlogs = transformedBlogs.filter(blog => blog.category === categoryName)
+          setBlogs(filteredBlogs)
+        } else if (Array.isArray(data)) {
+          const filteredBlogs = data.filter(blog => blog.category === categoryName)
+          setBlogs(filteredBlogs)
+        } else {
+          console.error("API'den beklenmeyen veri formatı:", data);
+          setBlogs([])
+        }
         setLoading(false)
       })
       .catch((err) => {
         console.error('Blogları çekerken hata:', err)
+        setBlogs([])
         setLoading(false)
       })
   }, [categoryName])
@@ -73,7 +93,7 @@ export default function CategoryDetail() {
           <div className="loading">
             <p>Yazılar yükleniyor...</p>
           </div>
-        ) : blogs.length === 0 ? (
+        ) : !Array.isArray(blogs) || blogs.length === 0 ? (
           <div className="empty-state">
             <p>Bu kategoride henüz yazı bulunmuyor.</p>
             <button onClick={() => navigate('/write')} className="write-btn">
