@@ -17,16 +17,56 @@ export default function BlogDetail() {
     setLoading(true)
     fetch(`http://localhost:3000/api/blogs/${id}`)
       .then((r) => r.json())
-      .then((data) => { setBlog(data); setLoading(false) })
-      .catch(() => setLoading(false))
+      .then((data) => {
+        // API'den gelen veri yapısını kontrol et ve düzelt
+        if (data && data.success && data.data) {
+          const blogData = data.data;
+          setBlog({
+            id: blogData.id,
+            title: blogData.title,
+            content: blogData.content,
+            author: blogData.author_name,
+            category: blogData.category_name,
+            createdAt: blogData.created_at,
+            updatedAt: blogData.updated_at
+          });
+        } else if (data && data.id) {
+          // Direkt blog objesi gelmişse
+          setBlog(data);
+        } else {
+          console.error("Blog verisi bulunamadı:", data);
+          setBlog(null);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Blog yüklenirken hata:", err);
+        setBlog(null);
+        setLoading(false);
+      })
   }, [id])
 
   useEffect(() => {
     setLoadingComments(true)
     fetch(`http://localhost:3000/api/blogs/${id}/comments`)
       .then((r) => r.json())
-      .then((data) => { setComments(data || []); setLoadingComments(false) })
-      .catch(() => setLoadingComments(false))
+      .then((data) => {
+        // API'den gelen veri yapısını kontrol et ve düzelt
+        if (data && data.success && Array.isArray(data.data)) {
+          setComments(data.data);
+        } else if (Array.isArray(data)) {
+          setComments(data);
+        } else {
+          console.error("Yorum verisi beklenmeyen format:", data);
+          setComments([]);
+        }
+        setLoadingComments(false);
+      })
+      .catch((err) => {
+        console.error("Yorumlar yüklenirken hata:", err);
+        setComments([]);
+        setLoadingComments(false);
+      })
   }, [id])
 
   const minutes = useMemo(() => estimateReadingMinutes(blog?.content), [blog])
@@ -75,7 +115,7 @@ export default function BlogDetail() {
         <h3 className="comments-title">Yorumlar</h3>
         {loadingComments ? (
           <div className="comment-item skeleton" style={{ height: 64 }} />
-        ) : comments.length === 0 ? (
+        ) : !Array.isArray(comments) || comments.length === 0 ? (
           <p className="comment-empty">Henüz yorum yok.</p>
         ) : (
           <div className="comments">
