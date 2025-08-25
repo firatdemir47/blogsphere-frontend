@@ -1,9 +1,26 @@
-import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 export default function Navigation() {
   const location = useLocation()
+  const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    // LocalStorage'dan kullanıcı bilgisini al
+    const userData = localStorage.getItem('user')
+    if (userData) {
+      setUser(JSON.parse(userData))
+    }
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    setUser(null)
+    navigate('/')
+  }
 
   const navItems = [
     { path: '/', label: 'Ana Sayfa', icon: '🏠' },
@@ -41,10 +58,30 @@ export default function Navigation() {
           <button className="theme-toggle" onClick={() => document.body.classList.toggle('light-theme')}>
             🌙
           </button>
-          <Link to="/write" className="write-btn">
-            <span className="write-icon">✏️</span>
-            <span className="write-text">Yaz</span>
-          </Link>
+          
+          {user ? (
+            <>
+              <Link to="/write" className="write-btn">
+                <span className="write-icon">✏️</span>
+                <span className="write-text">Yaz</span>
+              </Link>
+              <div className="user-menu">
+                <span className="user-name">👤 {user.name}</span>
+                <button onClick={handleLogout} className="logout-btn">
+                  Çıkış
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="auth-buttons">
+              <Link to="/login" className="login-btn">
+                Giriş Yap
+              </Link>
+              <Link to="/register" className="register-btn">
+                Kayıt Ol
+              </Link>
+            </div>
+          )}
         </div>
 
         <button 
@@ -70,6 +107,24 @@ export default function Navigation() {
               <span className="nav-label">{item.label}</span>
             </Link>
           ))}
+          
+          {user ? (
+            <div className="mobile-user-menu">
+              <span className="mobile-user-name">👤 {user.name}</span>
+              <button onClick={handleLogout} className="mobile-logout-btn">
+                Çıkış Yap
+              </button>
+            </div>
+          ) : (
+            <div className="mobile-auth-buttons">
+              <Link to="/login" className="mobile-login-btn">
+                Giriş Yap
+              </Link>
+              <Link to="/register" className="mobile-register-btn">
+                Kayıt Ol
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </nav>
