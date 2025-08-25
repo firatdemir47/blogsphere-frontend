@@ -9,6 +9,8 @@ import Categories from './routes/Categories.jsx'
 import CategoryDetail from './routes/CategoryDetail.jsx'
 import About from './routes/About.jsx'
 import Write from './routes/Write.jsx'
+import Login from './routes/Login.jsx'
+import Register from './routes/Register.jsx'
 
 const router = createBrowserRouter([
   { path: '/', element: <App /> },
@@ -18,6 +20,8 @@ const router = createBrowserRouter([
   { path: '/category/:categoryName', element: <CategoryDetail /> },
   { path: '/about', element: <About /> },
   { path: '/write', element: <Write /> },
+  { path: '/login', element: <Login /> },
+  { path: '/register', element: <Register /> },
 ])
 
 createRoot(document.getElementById('root')).render(
