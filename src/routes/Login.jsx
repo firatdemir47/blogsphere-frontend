@@ -26,7 +26,7 @@ export default function Login() {
     setError('')
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch('http://localhost:3000/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -38,8 +38,8 @@ export default function Login() {
 
       if (response.ok) {
         // Token'ı localStorage'a kaydet
-        localStorage.setItem('token', data.token)
-        localStorage.setItem('user', JSON.stringify(data.user))
+        localStorage.setItem('token', data.data.token)
+        localStorage.setItem('user', JSON.stringify(data.data.user))
         
         // Ana sayfaya yönlendir
         navigate('/')
